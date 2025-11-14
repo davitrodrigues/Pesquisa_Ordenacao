@@ -41,7 +41,7 @@ public class QuickInsercao {
         long inicio = System.nanoTime();
         for (int i = 0; i < 5; i++) {
             carregarArquivo(nomeArquivo);
-            quickSort();
+            QuickInsercao();
             String nomeSaida = gerarNomeSaida(nomeArquivo);
             gravarArquivo(nomeSaida);
         }
@@ -87,12 +87,7 @@ public class QuickInsercao {
         }
     }
 
-    public void InsertionSort(){
-        int i,j,temp;
-        int tamanho=i-j;
-        int limite=Math.min(tamanho, 20);
-        for (int i =esq)
-    }
+    
 
     public void quickInsercao() {
         ordena(0, this.quantidade - 1); 
@@ -127,6 +122,19 @@ public class QuickInsercao {
         }
         if (dir > i) {
             ordena(i, dir);
+        }
+    }
+
+    public void InsertionSort(int esq,int dir){
+        for (int i=esq+1;i<=dir;i++){
+            Registro temp=listaReservasQuickInsercao[i];
+            int j=i-1;
+
+            while (j>=esq&& comparar(listaReservasQuickInsercao[j],temp)>0){
+                listaReservasQuickInsercao[j+1]=listaReservasQuickInsercao[j];
+                j--;
+            }
+            listaReservasQuickInsercao[j+1]=temp;
         }
     }
 
