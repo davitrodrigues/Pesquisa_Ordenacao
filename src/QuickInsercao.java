@@ -8,7 +8,9 @@ import java.util.ArrayList;
 
 public class QuickInsercao {
     private Registro[] listaReservasQuickInsercao;
-    private int quantidade;
+    // aqui determino a quantidade que o insertion vai ser chamado
+    private int quantidade=20;
+
 
     public static void main(String[] args) {
         String[] arquivos = {
@@ -41,7 +43,7 @@ public class QuickInsercao {
         long inicio = System.nanoTime();
         for (int i = 0; i < 5; i++) {
             carregarArquivo(nomeArquivo);
-            QuickInsercao();
+            quickInsercao();
             String nomeSaida = gerarNomeSaida(nomeArquivo);
             gravarArquivo(nomeSaida);
         }
@@ -92,10 +94,17 @@ public class QuickInsercao {
     public void quickInsercao() {
         ordena(0, this.quantidade - 1); 
     }
-    
+    // chamada recursiva do quicksort
     private void ordena(int esq, int dir) {
+        if (esq >= dir) return;
+        // aqui que verifica se tem 20 elementos ou menos para chamar o insertion
+        if (dir - esq + 1 <= 20) {
+            InsertionSort(esq, dir); // como tem apenas 20 elementos, e insertionsort é o mais indicado quando tiver poucos elementos, chama ele aqui
+            return;
+        }
+
         int i, j;
-        Registro pivo, temp; 
+        Registro pivo, temp;
         i = esq;
         j = dir;
 
