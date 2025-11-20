@@ -180,10 +180,7 @@ public class Hash {
         
         // Tenta encontrar arquivo de pesquisa em diferentes locais
         String[] caminhosPesquisa = {
-            "src/arquivos_input/nome.txt",
-            "src/arquivos_input/pesquisa.txt",
-            "arquivos_input/pesquisa.txt",
-            "pesquisa.txt"
+            "src/arquivos_input/nome.txt"
         };
         
         File arquivoPesquisa = null;
