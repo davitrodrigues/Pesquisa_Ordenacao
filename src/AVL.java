@@ -117,17 +117,19 @@ public class AVL {
     }
 
     private void inserir(Registro registro) {
+        // insere e atualiza a raiz
         raiz = inserir(registro, raiz);
     }
 
     private NoAVL inserir(Registro registro, NoAVL no) {
+        // isso faz quando a árvore esta vazia
         if (no == null) {
             quant++;
             return new NoAVL(registro);
         }
-
+        // compara o nome do registro com o atual, ignorando maiusculas e minusculas
         int comparacao = registro.nome.compareToIgnoreCase(no.nome);
-
+        // decide se vai para esquerda ou direita
         if (comparacao < 0) {
             no.esq = inserir(registro, no.esq);
         } else if (comparacao > 0) {
@@ -136,11 +138,11 @@ public class AVL {
             no.registros.add(registro);
             return no;
         }
-
+        // atualiza a altura
         no.altura = 1 + Math.max(altura(no.esq), altura(no.dir));
 
         int balanceamento = obterBalanceamento(no);
-
+        // rotação para esquerda, direita ou dupla conforme o caso
         if (balanceamento > 1 && registro.nome.compareToIgnoreCase(no.esq.nome) < 0) {
             return rotacaoDireita(no);
         }
@@ -173,7 +175,7 @@ public class AVL {
     private NoAVL rotacaoDireita(NoAVL y) {
         NoAVL x = y.esq;
         NoAVL T2 = x.dir;
-
+        
         x.dir = y;
         y.esq = T2;
 

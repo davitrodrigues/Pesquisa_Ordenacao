@@ -137,29 +137,32 @@ public class ABB {
     }
 
     private void inserir(Registro registro) {
+        // arvore vazia, insere primeiro no
         if (raiz == null) {
             raiz = new NoABB(registro);
             quant++;
             return;
         }
-
+        // ponteiros para percorrer a arvore
         NoABB atual = raiz;
         NoABB pai = null;
-
+        // bsuca pela posucação da inserção
         while (atual != null) {
             pai = atual;
             int cmp = registro.nome.compareToIgnoreCase(atual.nome);
-
+            // direita
             if (cmp < 0) {
                 atual = atual.esq;
+            // esquerda
             } else if (cmp > 0) {
                 atual = atual.dir;
+            //  adiciona no vetor de registros
             } else {
                 atual.registros.add(registro);
                 return;
             }
         }
-
+        // coloca no lado direito ou esquerdo do pai
         if (registro.nome.compareToIgnoreCase(pai.nome) < 0) {
             pai.esq = new NoABB(registro);
         } else {
@@ -170,51 +173,67 @@ public class ABB {
     }
 
     public NoABB balancear() {
-        NoABB aux = new NoABB(new Registro("", "", "", "", ""));
+        // cria um vetor para fazer o caminhamento central
         ArrayList<NoABB> vetor = CamCentral();
-        balancear(vetor, aux, 0, vetor.size() - 1);
-        return aux.dir;
+        // arvore vazia, retorna nula
+        if (vetor.isEmpty()){
+            return null;
+        }
+        // chama o balanceamento iterativo, pq se for recursivo pode estourar
+        return balancear2(vetor, 0, vetor.size() - 1);
     }
 
-    private void balancear(ArrayList<NoABB> vetor, NoABB aux, int inicio, int fim) {
-        if (inicio <= fim) {
-            int meio = (inicio + fim) / 2;
-            inserir(vetor.get(meio), aux);
-            balancear(vetor, aux, inicio, meio - 1);
-            balancear(vetor, aux, meio + 1, fim);
-        }
-    }
-    
-    private void inserir(NoABB novoNo, NoABB aux) {
-        if (aux.dir == null) {
-            aux.dir = novoNo;
-            novoNo.esq = null;
-            novoNo.dir = null;
-            return;
-        }
+    private NoABB balancear2(ArrayList<NoABB> vetor, int inicio, int fim) {
+        if (inicio > fim) return null;
+        // esclhe o meio como raiz
+        int meio = (inicio + fim) / 2;
+        NoABB raizBalanceada = new NoABB(vetor.get(meio).nome, vetor.get(meio).registros);
+        // auxliares para fazer o balanceamento iterativo
+        ArrayList<int[]> auxiliar = new ArrayList<>();
+        ArrayList<NoABB> auxiliarNos = new ArrayList<>();
+        ArrayList<Boolean> auxiliarEsquerda = new ArrayList<>();
+        // subarvores esquerda e direita
+        auxiliar.add(new int[]{inicio, meio - 1});
+        auxiliarNos.add(raizBalanceada);
+        auxiliarEsquerda.add(true);
         
-        NoABB atual = aux.dir;
-        NoABB pai = null;
+        auxiliar.add(new int[]{meio + 1, fim});
+        auxiliarNos.add(raizBalanceada);
+        auxiliarEsquerda.add(false);
         
-        while (atual != null) {
-            pai = atual;
-            int cmp = novoNo.nome.compareToIgnoreCase(atual.nome);
+        while (!auxiliar.isEmpty()) {
+            int[] intervalo = auxiliar.remove(auxiliar.size() - 1);
+            NoABB pai = auxiliarNos.remove(auxiliarNos.size() - 1);
+            boolean isEsquerda = auxiliarEsquerda.remove(auxiliarEsquerda.size() - 1);
             
-            if (cmp < 0) {
-                atual = atual.esq;
-            } else {
-                atual = atual.dir;
+            int ini = intervalo[0];
+            int fi = intervalo[1];
+            
+            if (ini <= fi) {
+                int m = (ini + fi) / 2;
+                NoABB novoNo = new NoABB(vetor.get(m).nome, vetor.get(m).registros);
+                //  liga novo no ao pai
+                if (isEsquerda) {
+                    pai.esq = novoNo;
+                } else {
+                    pai.dir = novoNo;
+                }
+                //  reempilha as subarvores esquerda e direita
+                if (ini <= m - 1) {
+                    auxiliar.add(new int[]{ini, m - 1});
+                    auxiliarNos.add(novoNo);
+                    auxiliarEsquerda.add(true);
+                }
+                
+                if (m + 1 <= fi) {
+                    auxiliar.add(new int[]{m + 1, fi});
+                    auxiliarNos.add(novoNo);
+                    auxiliarEsquerda.add(false);
+                }
             }
         }
         
-        if (novoNo.nome.compareToIgnoreCase(pai.nome) < 0) {
-            pai.esq = novoNo;
-        } else {
-            pai.dir = novoNo;
-        }
-        
-        novoNo.esq = null;
-        novoNo.dir = null;
+        return raizBalanceada;
     }
 
     public ArrayList<NoABB> CamCentral() {
