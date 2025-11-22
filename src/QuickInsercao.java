@@ -55,9 +55,9 @@ public class QuickInsercao {
     private String gerarNomeSaida(String caminhoEntrada) {
         String nome = new File(caminhoEntrada).getName();
         if (nome.startsWith("Reserva")) {
-            return "src/arquivos_output/quick" + nome.substring("Reserva".length()); 
+            return "src/arquivos_output/quickInsercao" + nome.substring("Reserva".length()); 
         }
-        return "src/arquivos_output/quick_" + nome;
+        return "src/arquivos_output/quickInsercao_" + nome;
     }
 
     public void carregarArquivo(String nomeArquivo) throws IOException {

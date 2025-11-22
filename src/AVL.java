@@ -1,84 +1,275 @@
-// AVL.java
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+
 public class AVL {
-    private Node root;
+    private NoAVL raiz;
+    public int quant;
 
-    private int height(Node n) { return (n == null) ? 0 : n.height; }
+    private static class Registro {
+        String nome;
+        String reserva;
+        String voo;
+        String data;
+        String assento;
 
-    private int balanceFactor(Node n) { return (n == null) ? 0 : height(n.left) - height(n.right); }
+        Registro(String nome, String reserva, String voo, String data, String assento) {
+            this.nome = nome;
+            this.reserva = reserva;
+            this.voo = voo;
+            this.data = data;
+            this.assento = assento;
+        }
+    }
 
-    private Node rotateRight(Node y) {
-        Node x = y.left;
-        Node T2 = x.right;
-        x.right = y;
-        y.left = T2;
-        y.height = Math.max(height(y.left), height(y.right)) + 1;
-        x.height = Math.max(height(x.left), height(x.right)) + 1;
+    private static class NoAVL {
+        String nome;
+        ArrayList<Registro> registros;
+        NoAVL esq;
+        NoAVL dir;
+        int altura;
+
+        NoAVL(Registro registro) {
+            this.nome = registro.nome;
+            this.registros = new ArrayList<>();
+            this.registros.add(registro);
+            this.altura = 1;
+        }
+    }
+
+    public static void main(String[] args) {
+        String[] arquivos = {
+            "src/arquivos_input/Reserva1000alea.txt",
+            "src/arquivos_input/Reserva1000inv.txt",
+            "src/arquivos_input/Reserva1000ord.txt",
+            "src/arquivos_input/Reserva5000alea.txt",
+            "src/arquivos_input/Reserva5000inv.txt",
+            "src/arquivos_input/Reserva5000ord.txt",
+            "src/arquivos_input/Reserva10000alea.txt",
+            "src/arquivos_input/Reserva10000inv.txt",
+            "src/arquivos_input/Reserva10000ord.txt",
+            "src/arquivos_input/Reserva50000alea.txt",
+            "src/arquivos_input/Reserva50000inv.txt",
+            "src/arquivos_input/Reserva50000ord.txt"
+        };
+
+        for (String arquivo : arquivos) {
+            AVL avl = new AVL();
+            try {
+                long mediaMs = avl.executarCincoVezes(arquivo);
+                System.out.println(new File(arquivo).getName() + " - tempo médio (ms): " + mediaMs);
+            } catch (IOException e) {
+                System.err.println("Erro: " + e.getMessage());
+            }
+        }
+    }
+
+    public long executarCincoVezes(String nomeArquivo) throws IOException {
+        long inicio = System.nanoTime();
+
+        for (int i = 0; i < 5; i++) {
+            carregarArquivo(nomeArquivo);
+
+            String nomeSaida = gerarNomeSaida(nomeArquivo);
+            pesquisarEGravar(nomeSaida);
+        }
+
+        long fim = System.nanoTime();
+
+        long totalMs = (fim - inicio) / 1_000_000;
+        return totalMs / 5;
+    }
+
+    private String gerarNomeSaida(String caminhoEntrada) {
+        String nome = new File(caminhoEntrada).getName();
+        if (nome.startsWith("Reserva")) {
+            return "src/arquivos_output/AVL" + nome.substring("Reserva".length());
+        }
+        return "src/arquivos_output/AVL_" + nome;
+    }
+
+    public void carregarArquivo(String nomeArquivo) throws IOException {
+        raiz = null;
+        quant = 0;
+
+        try (BufferedReader leitor = new BufferedReader(new FileReader(nomeArquivo))) {
+            String linha;
+            while ((linha = leitor.readLine()) != null) {
+                linha = linha.trim();
+                if (linha.isEmpty()) continue;
+
+                String[] partes = linha.split(";", -1);
+                String reserva = partes.length > 0 ? partes[0].trim() : "";
+                String nome = partes.length > 1 ? partes[1].trim() : "";
+                String voo = partes.length > 2 ? partes[2].trim() : "";
+                String data = partes.length > 3 ? partes[3].trim() : "";
+                String assento = partes.length > 4 ? partes[4].trim() : "";
+
+                if (!nome.isEmpty()) {
+                    inserir(new Registro(nome, reserva, voo, data, assento));
+                }
+            }
+        }
+    }
+
+    private void inserir(Registro registro) {
+        raiz = inserir(registro, raiz);
+    }
+
+    private NoAVL inserir(Registro registro, NoAVL no) {
+        if (no == null) {
+            quant++;
+            return new NoAVL(registro);
+        }
+
+        int comparacao = registro.nome.compareToIgnoreCase(no.nome);
+
+        if (comparacao < 0) {
+            no.esq = inserir(registro, no.esq);
+        } else if (comparacao > 0) {
+            no.dir = inserir(registro, no.dir);
+        } else {
+            no.registros.add(registro);
+            return no;
+        }
+
+        no.altura = 1 + Math.max(altura(no.esq), altura(no.dir));
+
+        int balanceamento = obterBalanceamento(no);
+
+        if (balanceamento > 1 && registro.nome.compareToIgnoreCase(no.esq.nome) < 0) {
+            return rotacaoDireita(no);
+        }
+
+        if (balanceamento < -1 && registro.nome.compareToIgnoreCase(no.dir.nome) > 0) {
+            return rotacaoEsquerda(no);
+        }
+
+        if (balanceamento > 1 && registro.nome.compareToIgnoreCase(no.esq.nome) > 0) {
+            no.esq = rotacaoEsquerda(no.esq);
+            return rotacaoDireita(no);
+        }
+
+        if (balanceamento < -1 && registro.nome.compareToIgnoreCase(no.dir.nome) < 0) {
+            no.dir = rotacaoDireita(no.dir);
+            return rotacaoEsquerda(no);
+        }
+
+        return no;
+    }
+
+    private int altura(NoAVL no) {
+        return no == null ? 0 : no.altura;
+    }
+
+    private int obterBalanceamento(NoAVL no) {
+        return no == null ? 0 : altura(no.esq) - altura(no.dir);
+    }
+
+    private NoAVL rotacaoDireita(NoAVL y) {
+        NoAVL x = y.esq;
+        NoAVL T2 = x.dir;
+
+        x.dir = y;
+        y.esq = T2;
+
+        y.altura = Math.max(altura(y.esq), altura(y.dir)) + 1;
+        x.altura = Math.max(altura(x.esq), altura(x.dir)) + 1;
+
         return x;
     }
 
-    private Node rotateLeft(Node x) {
-        Node y = x.right;
-        Node T2 = y.left;
-        y.left = x;
-        x.right = T2;
-        x.height = Math.max(height(x.left), height(x.right)) + 1;
-        y.height = Math.max(height(y.left), height(y.right)) + 1;
+    private NoAVL rotacaoEsquerda(NoAVL x) {
+        NoAVL y = x.dir;
+        NoAVL T2 = y.esq;
+
+        y.esq = x;
+        x.dir = T2;
+
+        x.altura = Math.max(altura(x.esq), altura(x.dir)) + 1;
+        y.altura = Math.max(altura(y.esq), altura(y.dir)) + 1;
+
         return y;
     }
 
-    // comparação ignore case para ordenação das chaves
-    private int compareKey(String a, String b) {
-        return a.compareToIgnoreCase(b);
+    public NoAVL pesquisar(String nome) {
+        return pesquisar(nome, this.raiz);
     }
 
-    // Inserir: se chave existir, adiciona à lista do nó (cuida de nomes iguais)
-    private Node insert(Node node, String key, Reserva r) {
-        if (node == null) return new Node(key, r);
-
-        int cmp = compareKey(key, node.key);
-        if (cmp < 0) node.left = insert(node.left, key, r);
-        else if (cmp > 0) node.right = insert(node.right, key, r);
-        else {
-            // mesma chave: adiciona à lista (mantemos a ordem de inserção)
-            node.records.add(r);
-            return node;
+    private NoAVL pesquisar(String nome, NoAVL no) {
+        if (no == null) {
+            return null;
         }
 
-        node.height = 1 + Math.max(height(node.left), height(node.right));
-        int balance = balanceFactor(node);
+        int comparacao = nome.compareToIgnoreCase(no.nome);
 
-        // LL
-        if (balance > 1 && compareKey(key, node.left.key) < 0) return rotateRight(node);
-        // RR
-        if (balance < -1 && compareKey(key, node.right.key) > 0) return rotateLeft(node);
-        // LR
-        if (balance > 1 && compareKey(key, node.left.key) > 0) {
-            node.left = rotateLeft(node.left);
-            return rotateRight(node);
+        if (comparacao == 0) {
+            return no;
+        } else if (comparacao < 0) {
+            return pesquisar(nome, no.esq);
+        } else {
+            return pesquisar(nome, no.dir);
         }
-        // RL
-        if (balance < -1 && compareKey(key, node.right.key) < 0) {
-            node.right = rotateRight(node.right);
-            return rotateLeft(node);
-        }
-
-        return node;
     }
 
-    public void insert(String key, Reserva r) {
-        if (key == null) return;
-        root = insert(root, key.trim(), r);
-    }
+    private void pesquisarEGravar(String nomeSaida) throws IOException {
+        File arquivoSaida = new File(nomeSaida);
+        if (arquivoSaida.getParentFile() != null)
+            arquivoSaida.getParentFile().mkdirs();
 
-    // retorna lista de reservas para a chave (ou lista vazia)
-    public java.util.List<Reserva> search(String key) {
-        Node cur = root;
-        while (cur != null) {
-            int cmp = compareKey(key, cur.key);
-            if (cmp == 0) return cur.records;
-            else if (cmp < 0) cur = cur.left;
-            else cur = cur.right;
+        String[] caminhos = {
+            "src/arquivos_input/nome.txt",
+            "src/arquivos_input/pesquisa.txt",
+            "arquivos_input/nome.txt",
+            "nome.txt"
+        };
+
+        File arquivoPesquisa = null;
+        for (String c : caminhos) {
+            File f = new File(c);
+            if (f.exists()) {
+                arquivoPesquisa = f;
+                break;
+            }
         }
-        return java.util.Collections.emptyList();
+
+        if (arquivoPesquisa == null) {
+            System.err.println("ERRO: nome.txt não encontrado!");
+            return;
+        }
+
+        try (BufferedReader leitor = new BufferedReader(new FileReader(arquivoPesquisa));
+             BufferedWriter escritor = new BufferedWriter(new FileWriter(arquivoSaida))) {
+
+            String nomePesquisa;
+            int cont = 0;
+
+            while ((nomePesquisa = leitor.readLine()) != null && cont < 400) {
+                nomePesquisa = nomePesquisa.trim();
+                if (nomePesquisa.isEmpty()) continue;
+
+                NoAVL resultado = pesquisar(nomePesquisa);
+
+                escritor.write("NOME " + nomePesquisa + ":\n");
+
+                if (resultado == null || resultado.registros.isEmpty()) {
+                    escritor.write("NÃO TEM RESERVA\n\n");
+                } else {
+                    for (Registro reg : resultado.registros) {
+                        escritor.write(String.format(
+                            "Reserva: %-8s Voo: %-8s Data: %-10s Assento: %-4s\n",
+                            reg.reserva, reg.voo, reg.data, reg.assento
+                        ));
+                    }
+                    escritor.write("TOTAL: " + resultado.registros.size() + " reservas\n\n");
+                }
+
+                cont++;
+            }
+        }
     }
 }
