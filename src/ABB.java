@@ -11,6 +11,13 @@ public class ABB {
     private NoABB raiz;
     public int quant;
     
+    // Índice secundário para busca por reserva
+    private ArrayList<Registro> indiceReserva;
+    
+    public ABB() {
+        indiceReserva = new ArrayList<>();
+    }
+    
     private static class Registro {
         String nome;
         String reserva;
@@ -72,7 +79,7 @@ public class ABB {
             "src/arquivos_input/Reserva50000inv.txt",
             "src/arquivos_input/Reserva50000ord.txt"
         };
-
+        // roda o arquivo 5 vezes e obtém a média 
         for (String arquivo : arquivos) {
             ABB abb = new ABB();
             try {
@@ -111,6 +118,9 @@ public class ABB {
     public void carregarArquivo(String nomeArquivo) throws IOException {
         raiz = null;
         quant = 0;
+        
+        // Limpa o índice secundário
+        indiceReserva.clear();
 
         try (BufferedReader leitor = new BufferedReader(new FileReader(nomeArquivo))) {
             String linha;
@@ -137,6 +147,9 @@ public class ABB {
     }
 
     private void inserir(Registro registro) {
+        // adiciona ao índice secundário
+        indiceReserva.add(registro);
+        
         // arvore vazia, insere primeiro no
         if (raiz == null) {
             raiz = new NoABB(registro);
@@ -202,15 +215,17 @@ public class ABB {
         auxiliarEsquerda.add(false);
         
         while (!auxiliar.isEmpty()) {
+            // remove do auxiliar 
             int[] intervalo = auxiliar.remove(auxiliar.size() - 1);
             NoABB pai = auxiliarNos.remove(auxiliarNos.size() - 1);
             boolean isEsquerda = auxiliarEsquerda.remove(auxiliarEsquerda.size() - 1);
-            
+            // define o limite
             int ini = intervalo[0];
             int fi = intervalo[1];
-            
+            // so faz quando o vetor nao tiver vazio
             if (ini <= fi) {
                 int m = (ini + fi) / 2;
+                // cria o novo no
                 NoABB novoNo = new NoABB(vetor.get(m).nome, vetor.get(m).registros);
                 //  liga novo no ao pai
                 if (isEsquerda) {
@@ -273,6 +288,18 @@ public class ABB {
             return pesquisar(num, no.getEsq());
         }
         return pesquisar(num, no.getDir());
+    }
+    
+    // Busca por reserva (chave secundária) quando nomes são iguais
+    private Registro pesquisarPorReserva(String numeroReserva) {
+        // Busca manual no ArrayList sem usar métodos prontos
+        for (int i = 0; i < indiceReserva.size(); i++) {
+            Registro reg = indiceReserva.get(i);
+            if (reg.reserva.equalsIgnoreCase(numeroReserva)) {
+                return reg;
+            }
+        }
+        return null;
     }
 
 
