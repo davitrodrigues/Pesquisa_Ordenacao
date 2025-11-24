@@ -159,7 +159,7 @@ public class ABB {
         // ponteiros para percorrer a arvore
         NoABB atual = raiz;
         NoABB pai = null;
-        // bsuca pela posucação da inserção
+        // bsuca pela posição da inserção
         while (atual != null) {
             pai = atual;
             int cmp = registro.nome.compareToIgnoreCase(atual.nome);
@@ -198,7 +198,7 @@ public class ABB {
 
     // balanceamento 
     private NoABB balancear2(ArrayList<NoABB> vetor, int inicio, int fim) {
-        // 
+        // intervalo vazio
         if (inicio > fim) {
             return null;
         }
@@ -220,12 +220,16 @@ public class ABB {
     // método que faz o caminhamento central
     public ArrayList<NoABB> CamCentral() {
         ArrayList<NoABB> vetor = new ArrayList<>();
-        if (raiz == null) return vetor;
+        // se tiver vazio, retorna o vetor
+        if (raiz == null) {
+            return vetor;
+        }
         
         ArrayList<NoABB> auxiliar = new ArrayList<>();
         NoABB atual = raiz;
-        
+        // pecorre todos os nós
         while (atual != null || !auxiliar.isEmpty()) {
+            // vai para a esquerda até o fim
             while (atual != null) {
                 auxiliar.add(atual);
                 atual = atual.esq;

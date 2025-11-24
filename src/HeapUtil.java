@@ -91,28 +91,40 @@ public class HeapUtil {
 
     // Heapsort sobre listaReservas: ordenar por nome, se igual por código
     public void heapSort() {
-        if (listaReservas == null || quantidade <= 1) return;
+        // lista nula ou 0\1 elemento: nada a fazer
+        if (listaReservas == null || quantidade <= 1){    
+         return;
+        }
+        // começa dos internos até a raiz
         for (int i = quantidade / 2 - 1; i >= 0; i--) {
             heapify(quantidade, i);
         }
+        // traz o maior para o fim e refaz o heap
         for (int i = quantidade - 1; i >= 0; i--) {
+            // troca raiz com o último
             Registro temporario = listaReservas[0];
             listaReservas[0] = listaReservas[i];
             listaReservas[i] = temporario;
+            // reorganiza tudo
             heapify(i, 0);
         }
     }
 
     private void heapify(int n, int i) {
+        // maior é o pai
         int maior = i;
+        // os filhos desse pai (não são orfãos)
         int esquerda = 2 * i + 1;
         int direita = 2 * i + 2;
+        // esquerda exist e é maior que o pai, maior
         if (esquerda < n && comparar(listaReservas[esquerda], listaReservas[maior]) > 0) {
             maior = esquerda;
         }
+        // mesma comparção com a direita
         if (direita < n && comparar(listaReservas[direita], listaReservas[maior]) > 0) {
             maior = direita;
         }
+        // se o maior não é o pai, troca e continua heapify
         if (maior != i) {
             Registro troca = listaReservas[i];
             listaReservas[i] = listaReservas[maior];

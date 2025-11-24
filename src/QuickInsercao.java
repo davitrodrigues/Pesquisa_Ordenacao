@@ -96,7 +96,9 @@ public class QuickInsercao {
     }
     // chamada recursiva do quicksort
     private void ordena(int esq, int dir) {
-        if (esq >= dir) return;
+        if (esq >= dir){ 
+            return;
+        }
         // aqui que verifica se tem 20 elementos ou menos para chamar o insertion
         if (dir - esq + 1 <= 20) {
             InsertionSort(esq, dir); // como tem apenas 20 elementos, e insertionsort é o mais indicado quando tiver poucos elementos, chama ele aqui
