@@ -53,7 +53,7 @@ public class QuickSort {
     private String gerarNomeSaida(String caminhoEntrada) {
         String nome = new File(caminhoEntrada).getName();
         if (nome.startsWith("Reserva")) {
-            return "src/arquivos_output/quick" + nome.substring("Reserva".length()); // Corrigido: era "heap"
+            return "src/arquivos_output/quick" + nome.substring("Reserva".length()); 
         }
         return "src/arquivos_output/quick_" + nome;
     }
@@ -86,26 +86,30 @@ public class QuickSort {
             }
         }
     }
-
+    // metodo que chama o quicksort 
     public void quickSort() {
         ordena(0, this.quantidade - 1); 
     }
-    
+    // metodo  recursivo
     private void ordena(int esq, int dir) {
         int i, j;
+        // declara o pivo como centro
         Registro pivo, temp; 
         i = esq;
         j = dir;
-
+        // elemento central
         pivo = this.listaReservasQuick[(i + j) / 2];
         
-        do { 
-            while (comparar(this.listaReservasQuick[i], pivo) < 0) { // Corrigido: usava <
+        do {
+            // anda da esquerda ate encontrar o elemento menor ou igual o pivo
+            while (comparar(this.listaReservasQuick[i], pivo) < 0) { 
                 i++;
             }
-            while (comparar(this.listaReservasQuick[j], pivo) > 0) { // Corrigido: usava >
+            // anda da esquerda ate encontrar o elemento maior ou igual o pivo
+            while (comparar(this.listaReservasQuick[j], pivo) > 0) { 
                 j--;
             }
+            // troca os elementos quando se encontram
             if (i <= j) {
                 temp = this.listaReservasQuick[i];
                 this.listaReservasQuick[i] = this.listaReservasQuick[j];
@@ -123,7 +127,7 @@ public class QuickSort {
         }
     }
 
-    
+    // compara o nome, e se for igual, pela reserva
     private int comparar(Registro a, Registro b) {
         int comparacaoNome = a.nome.compareTo(b.nome);
         if (comparacaoNome != 0) return comparacaoNome;

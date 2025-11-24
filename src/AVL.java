@@ -173,12 +173,14 @@ public class AVL {
     }
 
     private NoAVL rotacaoDireita(NoAVL y) {
+        // x vai ser a nova raiz
         NoAVL x = y.esq;
+        // filho esquerdo de y
         NoAVL T2 = x.dir;
-        
+        // faz  a rotação
         x.dir = y;
         y.esq = T2;
-
+        // atualiza a altura
         y.altura = Math.max(altura(y.esq), altura(y.dir)) + 1;
         x.altura = Math.max(altura(x.esq), altura(x.dir)) + 1;
 
@@ -186,6 +188,7 @@ public class AVL {
     }
 
     private NoAVL rotacaoEsquerda(NoAVL x) {
+        // mesma logica do outro, porem y vira  raiz de t2 fica como filho de x
         NoAVL y = x.dir;
         NoAVL T2 = y.esq;
 

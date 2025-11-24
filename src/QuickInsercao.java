@@ -135,14 +135,18 @@ public class QuickInsercao {
     }
 
     public void InsertionSort(int esq,int dir){
+        // começa pelo segundo elemento
         for (int i=esq+1;i<=dir;i++){
+            // guarda o atual
             Registro temp=listaReservasQuickInsercao[i];
+            // pecorre os anteriores
             int j=i-1;
-
+            // aqui verifica se o anterior é maior que tem, se for vai para direita
             while (j>=esq&& comparar(listaReservasQuickInsercao[j],temp)>0){
                 listaReservasQuickInsercao[j+1]=listaReservasQuickInsercao[j];
                 j--;
             }
+            // posição correta, inserir o temp
             listaReservasQuickInsercao[j+1]=temp;
         }
     }
