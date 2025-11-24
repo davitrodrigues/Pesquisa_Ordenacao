@@ -11,7 +11,7 @@ public class ABB {
     private NoABB raiz;
     public int quant;
     
-    // Índice secundário para busca por reserva
+    // chave secundaria
     private ArrayList<Registro> indiceReserva;
     
     public ABB() {
@@ -192,65 +192,32 @@ public class ABB {
         if (vetor.isEmpty()){
             return null;
         }
-        // chama o balanceamento iterativo, pq se for recursivo pode estourar
+        // chama o balanceamento recursivo
         return balancear2(vetor, 0, vetor.size() - 1);
     }
 
+    // balanceamento 
     private NoABB balancear2(ArrayList<NoABB> vetor, int inicio, int fim) {
-        if (inicio > fim) return null;
-        // esclhe o meio como raiz
-        int meio = (inicio + fim) / 2;
-        NoABB raizBalanceada = new NoABB(vetor.get(meio).nome, vetor.get(meio).registros);
-        // auxliares para fazer o balanceamento iterativo
-        ArrayList<int[]> auxiliar = new ArrayList<>();
-        ArrayList<NoABB> auxiliarNos = new ArrayList<>();
-        ArrayList<Boolean> auxiliarEsquerda = new ArrayList<>();
-        // subarvores esquerda e direita
-        auxiliar.add(new int[]{inicio, meio - 1});
-        auxiliarNos.add(raizBalanceada);
-        auxiliarEsquerda.add(true);
-        
-        auxiliar.add(new int[]{meio + 1, fim});
-        auxiliarNos.add(raizBalanceada);
-        auxiliarEsquerda.add(false);
-        
-        while (!auxiliar.isEmpty()) {
-            // remove do auxiliar 
-            int[] intervalo = auxiliar.remove(auxiliar.size() - 1);
-            NoABB pai = auxiliarNos.remove(auxiliarNos.size() - 1);
-            boolean isEsquerda = auxiliarEsquerda.remove(auxiliarEsquerda.size() - 1);
-            // define o limite
-            int ini = intervalo[0];
-            int fi = intervalo[1];
-            // so faz quando o vetor nao tiver vazio
-            if (ini <= fi) {
-                int m = (ini + fi) / 2;
-                // cria o novo no
-                NoABB novoNo = new NoABB(vetor.get(m).nome, vetor.get(m).registros);
-                //  liga novo no ao pai
-                if (isEsquerda) {
-                    pai.esq = novoNo;
-                } else {
-                    pai.dir = novoNo;
-                }
-                //  reempilha as subarvores esquerda e direita
-                if (ini <= m - 1) {
-                    auxiliar.add(new int[]{ini, m - 1});
-                    auxiliarNos.add(novoNo);
-                    auxiliarEsquerda.add(true);
-                }
-                
-                if (m + 1 <= fi) {
-                    auxiliar.add(new int[]{m + 1, fi});
-                    auxiliarNos.add(novoNo);
-                    auxiliarEsquerda.add(false);
-                }
-            }
+        // 
+        if (inicio > fim) {
+            return null;
         }
         
-        return raizBalanceada;
+        // meio é a raiz
+        int meio = (inicio + fim) / 2;
+        
+        // cria a raiz
+        NoABB raiz = new NoABB(vetor.get(meio).nome, vetor.get(meio).registros);
+        
+        // esquerda
+        raiz.esq = balancear2(vetor, inicio, meio - 1);
+        
+        //  direita
+        raiz.dir = balancear2(vetor, meio + 1, fim);
+        
+        return raiz;
     }
-
+    // método que faz o caminhamento central
     public ArrayList<NoABB> CamCentral() {
         ArrayList<NoABB> vetor = new ArrayList<>();
         if (raiz == null) return vetor;
@@ -290,9 +257,9 @@ public class ABB {
         return pesquisar(num, no.getDir());
     }
     
-    // Busca por reserva (chave secundária) quando nomes são iguais
+    // busca por chave secundaria
     private Registro pesquisarPorReserva(String numeroReserva) {
-        // Busca manual no ArrayList sem usar métodos prontos
+        // busca sem usar metodos prontos
         for (int i = 0; i < indiceReserva.size(); i++) {
             Registro reg = indiceReserva.get(i);
             if (reg.reserva.equalsIgnoreCase(numeroReserva)) {
