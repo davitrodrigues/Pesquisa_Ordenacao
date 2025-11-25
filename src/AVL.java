@@ -236,7 +236,7 @@ public class AVL {
     
     // busca por chave secundaria
     private Registro pesquisarPorReserva(String numeroReserva) {
-        // busca sem usar metodos prontos
+        
         for (int i = 0; i < indiceReserva.size(); i++) {
             Registro reg = indiceReserva.get(i);
             if (reg.reserva.equalsIgnoreCase(numeroReserva)) {
@@ -317,4 +317,5 @@ public class AVL {
             }
         }
     }
+
 }
