@@ -19,7 +19,6 @@ public class Hash {
         // Array com os caminhos dos arquivos de entrada
         String[] arquivos = {
             "src/arquivos_input/Reserva1000alea.txt"
-            ,"src/arquivos_input/nome.txt"
             , "src/arquivos_input/Reserva1000inv.txt"
             , "src/arquivos_input/Reserva1000ord.txt"
             , "src/arquivos_input/Reserva5000alea.txt"

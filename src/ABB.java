@@ -274,64 +274,77 @@ public class ABB {
     }
 
 
-    private void pesquisarEGravar(String nomeSaida) throws IOException {
-        File arquivoSaida = new File(nomeSaida);
-        if (arquivoSaida.getParentFile() != null)
-            arquivoSaida.getParentFile().mkdirs();
+   private void pesquisarEGravar(String nomeSaida) throws IOException {
+    File arquivoSaida = new File(nomeSaida);
+    if (arquivoSaida.getParentFile() != null)
+        arquivoSaida.getParentFile().mkdirs();
 
 
-        String[] caminhos = {
-            "src/arquivos_input/nome.txt",
-            "src/arquivos_input/pesquisa.txt",
-            "arquivos_input/nome.txt",
-            "nome.txt"
-        };
+    String[] caminhos = {
+        "src/arquivos_input/nome.txt",
+        "src/arquivos_input/pesquisa.txt",
+        "arquivos_input/nome.txt",
+        "nome.txt"
+    };
 
-        File arquivoPesquisa = null;
-        for (String c : caminhos) {
-            File f = new File(c);
-            if (f.exists()) {
-                arquivoPesquisa = f;
-                break;
-            }
+    File arquivoPesquisa = null;
+    for (String c : caminhos) {
+        File f = new File(c);
+        if (f.exists()) {
+            arquivoPesquisa = f;
+            break;
         }
+    }
 
-        if (arquivoPesquisa == null) {
-            System.err.println("ERRO: nome.txt não encontrado!");
-            return;
-        }
+    if (arquivoPesquisa == null) {
+        System.err.println("ERRO: nome.txt não encontrado!");
+        return;
+    }
 
-        try (BufferedReader leitor = new BufferedReader(new FileReader(arquivoPesquisa));
-             BufferedWriter escritor = new BufferedWriter(new FileWriter(arquivoSaida))) {
+    try (BufferedReader leitor = new BufferedReader(new FileReader(arquivoPesquisa));
+         BufferedWriter escritor = new BufferedWriter(new FileWriter(arquivoSaida))) {
 
-            String nomePesquisa;
-            int cont = 0;
+        String nomePesquisa;
+        int cont = 0;
+
+        
+        while ((nomePesquisa = leitor.readLine()) != null && cont < 400) {
+            nomePesquisa = nomePesquisa.trim();
+            if (nomePesquisa.isEmpty()) continue;
 
             
-            while ((nomePesquisa = leitor.readLine()) != null && cont < 400) {
-                nomePesquisa = nomePesquisa.trim();
-                if (nomePesquisa.isEmpty()) continue;
+            NoABB resultado = pesquisar(nomePesquisa);
 
-                
-                NoABB resultado = pesquisar(nomePesquisa);
+            escritor.write("NOME " + nomePesquisa + ":\n");
 
-                escritor.write("NOME " + nomePesquisa + ":\n");
-
-                if (resultado == null || resultado.registros.isEmpty()) {
-                    escritor.write("NÃO TEM RESERVA\n\n");
+            if (resultado == null || resultado.registros.isEmpty()) {
+                escritor.write("NÃO TEM RESERVA\n\n");
+            } else {
+                // Se houver mais de 1 registro com o mesmo nome
+                if (resultado.registros.size() > 1) {
+                    // Chama o método pesquisarPorReserva para cada reserva
+                    for (Registro reg : resultado.registros) {
+                        Registro regEncontrado = pesquisarPorReserva(reg.reserva);
+                        if (regEncontrado != null) {
+                            escritor.write(String.format(
+                                "Reserva: %-8s Voo: %-8s Data: %-10s Assento: %-4s\n",
+                                regEncontrado.reserva, regEncontrado.voo, regEncontrado.data, regEncontrado.assento
+                            ));
+                        }
+                    }
                 } else {
-                    
+                    // Se só tem 1 registro, não precisa buscar por reserva
                     for (Registro reg : resultado.registros) {
                         escritor.write(String.format(
                             "Reserva: %-8s Voo: %-8s Data: %-10s Assento: %-4s\n",
                             reg.reserva, reg.voo, reg.data, reg.assento
                         ));
                     }
-                    escritor.write("TOTAL: " + resultado.registros.size() + " reservas\n\n");
                 }
-
-                cont++;
+                escritor.write("TOTAL: " + resultado.registros.size() + " reservas\n\n");
             }
+
+            cont++;
         }
     }
-}
+   }}

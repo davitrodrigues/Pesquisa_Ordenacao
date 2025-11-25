@@ -9,6 +9,13 @@ import java.util.ArrayList;
 public class AVL {
     private NoAVL raiz;
     public int quant;
+    
+    // chave secundaria
+    private ArrayList<Registro> indiceReserva;
+    
+    public AVL() {
+        indiceReserva = new ArrayList<>();
+    }
 
     private static class Registro {
         String nome;
@@ -95,6 +102,9 @@ public class AVL {
     public void carregarArquivo(String nomeArquivo) throws IOException {
         raiz = null;
         quant = 0;
+        
+        // Limpa o índice secundário
+        indiceReserva.clear();
 
         try (BufferedReader leitor = new BufferedReader(new FileReader(nomeArquivo))) {
             String linha;
@@ -117,6 +127,9 @@ public class AVL {
     }
 
     private void inserir(Registro registro) {
+        // adiciona ao índice secundário
+        indiceReserva.add(registro);
+        
         // insere e atualiza a raiz
         raiz = inserir(registro, raiz);
     }
@@ -220,6 +233,18 @@ public class AVL {
             return pesquisar(nome, no.dir);
         }
     }
+    
+    // busca por chave secundaria
+    private Registro pesquisarPorReserva(String numeroReserva) {
+        // busca sem usar metodos prontos
+        for (int i = 0; i < indiceReserva.size(); i++) {
+            Registro reg = indiceReserva.get(i);
+            if (reg.reserva.equalsIgnoreCase(numeroReserva)) {
+                return reg;
+            }
+        }
+        return null;
+    }
 
     private void pesquisarEGravar(String nomeSaida) throws IOException {
         File arquivoSaida = new File(nomeSaida);
@@ -264,11 +289,26 @@ public class AVL {
                 if (resultado == null || resultado.registros.isEmpty()) {
                     escritor.write("NÃO TEM RESERVA\n\n");
                 } else {
-                    for (Registro reg : resultado.registros) {
-                        escritor.write(String.format(
-                            "Reserva: %-8s Voo: %-8s Data: %-10s Assento: %-4s\n",
-                            reg.reserva, reg.voo, reg.data, reg.assento
-                        ));
+                    // Se houver mais de 1 registro com o mesmo nome
+                    if (resultado.registros.size() > 1) {
+                        // Chama o método pesquisarPorReserva para cada reserva
+                        for (Registro reg : resultado.registros) {
+                            Registro regEncontrado = pesquisarPorReserva(reg.reserva);
+                            if (regEncontrado != null) {
+                                escritor.write(String.format(
+                                    "Reserva: %-8s Voo: %-8s Data: %-10s Assento: %-4s\n",
+                                    regEncontrado.reserva, regEncontrado.voo, regEncontrado.data, regEncontrado.assento
+                                ));
+                            }
+                        }
+                    } else {
+                        // Se só tem 1 registro, não precisa buscar por reserva
+                        for (Registro reg : resultado.registros) {
+                            escritor.write(String.format(
+                                "Reserva: %-8s Voo: %-8s Data: %-10s Assento: %-4s\n",
+                                reg.reserva, reg.voo, reg.data, reg.assento
+                            ));
+                        }
                     }
                     escritor.write("TOTAL: " + resultado.registros.size() + " reservas\n\n");
                 }
